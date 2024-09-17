@@ -1,0 +1,51 @@
+codigo json
+{
+  "Comment": "Assistente de Delivery com AWS Step Functions e Amazon Bedrock",
+  "StartAt": "ReceberPedido",
+  "States": {
+    "ReceberPedido": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:ReceberPedidoLambda",
+      "Next": "ValidarPedido"
+    },
+    "ValidarPedido": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.pedidoValido",
+          "BooleanEquals": true,
+          "Next": "ProcessarPagamento"
+        },
+        {
+          "Variable": "$.pedidoValido",
+          "BooleanEquals": false,
+          "Next": "PedidoInvalido"
+        }
+      ],
+      "Default": "PedidoInvalido"
+    },
+    "ProcessarPagamento": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:ProcessarPagamentoLambda",
+      "Next": "AtualizarStatus"
+    },
+    "AtualizarStatus": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:AtualizarStatusLambda",
+      "Next": "PersonalizarExperiencia"
+    },
+    "PersonalizarExperiencia": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:PersonalizarExperienciaLambda",
+      "Next": "ConcluirPedido"
+    },
+    "PedidoInvalido": {
+      "Type": "Fail",
+      "Error": "PedidoInvalido",
+      "Cause": "O pedido é inválido."
+    },
+    "ConcluirPedido": {
+      "Type": "Succeed"
+    }
+  }
+}
